@@ -9,7 +9,7 @@ def is_intersect(self, surface):
     return right1 > left2 and left1 < right2 and up1 < down2 and down1 > up2
 
 class Unit:
-    def __init__(self, x, y, width = 50, height=100):
+    def __init__(self, x, y, width = 20, height=30):
         self.pos = self.x, self.y = x, y
         self.width = width
         self.height = height
@@ -58,10 +58,10 @@ class Unit:
 
 
     def render(self, screen):
-        global SCR_X
+        global SCR_X, SCR_Y
         rect = pygame.Rect(
             int(self.x - SCR_X),
-            int(self.y),
+            int(self.y - SCR_Y),
             self.width,
             self.height,
         )
@@ -71,7 +71,7 @@ class Unit:
         # self.check_possible_moves_x()
         # self.check_possible_moves_y()
         if self.maygo_down:
-            self.a_y = 60 * 60 / (FPS ** 2)
+            self.a_y = (40 * 40 / (FPS ** 2)) * SCALE_D
             self.speed_y += self.a_y
         else:
             self.a_y = 0
@@ -79,26 +79,6 @@ class Unit:
                 self.speed_y = 1
 
     def check_possible_moves_x(self):
-        # self.maygo_left = True
-        # self.maygo_right = True
-        # for i in range(len(surfaces)):
-        #     surface = surfaces[i]
-        #     # check is unit on one level with surface vertically
-        #     if self.down > surface.up and \
-        #          self.up < surface.down:
-        #         # check maygo_left
-        #         if self.left <= surface.right and \
-        #                 self.right > surface.right:
-        #             self.maygo_left = False
-        #             if self.down - surface.up >= abs(self.speed_y):
-        #                 self.x = surface.right
-        #         # check maygo_right
-        #         if self.right >= surface.left and \
-        #                 self.left < surface.left:
-        #             self.maygo_right = False
-        #             if self.down - surface.up >= abs(self.speed_y):
-        #                 self.x = surface.left - self.width
-        #     self.set_borders()
         self.maygo_left, self.maygo_right = True, True
         for surface in surfaces:
             if is_intersect(self, surface):
@@ -114,24 +94,6 @@ class Unit:
 
 
     def check_possible_moves_y(self):
-        # self.maygo_up = True
-        # self.maygo_down = True
-        # for i in range(len(surfaces)):
-        #     surface = surfaces[i]
-        #     # check is unit on one level width surface horizontally
-        #     if self.right > surface.left and \
-        #             self.left < surface.right:
-        #         # check maygo_up
-        #         if self.up >= surface.down and \
-        #                 self.down < surface.down:
-        #             self.maygo_up = False
-        #             self.y = surface.down
-        #         # check maygo_down
-        #         if self.down >= surface.up and \
-        #                 self.up < surface.up and self.maygo_down:
-        #             self.maygo_down = False
-        #             self.y = surface.up - self.height
-        #     self.set_borders()
         self.maygo_up, self.maygo_down = True, True
         for surface in surfaces:
             if is_intersect(self, surface):
@@ -151,31 +113,34 @@ pygame.init()
 
 size = WIDTH, HEIGHT = 800, 640
 FPS = 60
-BASEMARIOSPEED = 300
+SCALE_D = 3.5
+BASEMARIOSPEED = 150 * SCALE_D
+MARIOJUMPSPEED = 450 * SCALE_D
 
 screen = pygame.display.set_mode(size)
 SCR_X = 0
+SCR_Y = 150
 
 clock = pygame.time.Clock()
 sky_color = pygame.Color("blue")
 
-Mario = Unit(100, 0)
+Mario = Unit(42 * SCALE_D, 193 * SCALE_D, 10 * SCALE_D, 15 * SCALE_D)
 
 running = True
 while running:
     # Mario.check_possible_moves_y()
     # Mario.check_possible_moves_x()
     Mario.move()
-    SCR_X = Mario.x - 150
+    SCR_X = (Mario.x - 150)
     Mario.change_speed()
 
     # print(Mario.x, Mario.y, end=" ")
     # print(f"{Mario.maygo_down=}")
-    print(SCR_X)
+    # print(SCR_X)
 
     screen.fill(sky_color)
     for surface in surfaces:
-        surface.draw(screen, SCR_X)
+        surface.draw(screen, SCR_X, SCR_Y)
     Mario.render(screen)
 
     pygame.display.flip()
@@ -191,7 +156,7 @@ while running:
                 Mario.speed_x = BASEMARIOSPEED / FPS
             elif event.key == 273:
                 if Mario.maygo_up and not Mario.maygo_down:
-                    Mario.speed_y = -900 / FPS
+                    Mario.speed_y = -MARIOJUMPSPEED / FPS
                     # Mario.maygo_down = True
         elif event.type == pygame.KEYUP:
             if event.key == 276:
@@ -203,3 +168,4 @@ while running:
 
     clock.tick(FPS)
 pygame.quit()
+
